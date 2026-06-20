@@ -45,7 +45,20 @@ const SHIFT_TIMINGS = {
 };
 
 // Get Dinesh S's shift for a given date
+// Checks localStorage first (user-edited), then falls back to hardcoded roster
 function getDineshShift(dateStr) {
+  // Check user-edited roster in localStorage first
+  const customRoster = getCustomRoster();
+  const customShift = customRoster[dateStr];
+  if (customShift) {
+    const type = customShift.type || 'unknown';
+    if (SHIFT_TIMINGS[type]) {
+      return { type, ...SHIFT_TIMINGS[type] };
+    }
+    return { type, label: type.charAt(0).toUpperCase() + type.slice(1) };
+  }
+
+  // Fallback to hardcoded roster
   const roster = SHIFT_ROSTER[dateStr];
   if (!roster) return { type: 'unknown', label: 'No roster data' };
   
@@ -65,6 +78,18 @@ function getDineshShift(dateStr) {
     return { type: 'general', ...SHIFT_TIMINGS.general };
   }
   return { type: 'off', label: 'Day Off' };
+}
+
+// Get custom roster from localStorage
+function getCustomRoster() {
+  try {
+    return JSON.parse(localStorage.getItem('customRoster') || '{}');
+  } catch { return {}; }
+}
+
+// Save custom roster to localStorage
+function saveCustomRoster(roster) {
+  localStorage.setItem('customRoster', JSON.stringify(roster));
 }
 
 // Meal timing plans based on shift type

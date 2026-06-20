@@ -244,6 +244,19 @@
           <div id="roster-display"></div>
           <button id="btn-edit-roster" class="btn-secondary">Edit Roster</button>
         </div>
+
+        <!-- Roster Editor (hidden by default) -->
+        <div id="roster-editor" class="card hidden">
+          <h3>✏️ Edit Roster</h3>
+          <p class="muted">Set your shift for each day. Changes are saved in the app.</p>
+          <div class="form-row">
+            <label>Month:</label>
+            <input type="month" id="roster-month" value="2026-06">
+          </div>
+          <button id="btn-load-month" class="btn-secondary">Load Month</button>
+          <div id="roster-edit-grid"></div>
+          <button id="btn-save-roster" class="btn-primary hidden">Save Roster</button>
+        </div>
       </section>
 
       <!-- Settings Tab -->

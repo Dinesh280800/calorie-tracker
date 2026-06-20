@@ -876,6 +876,45 @@ main {
   border-radius: 2px;
 }
 
+/* Roster Editor */
+.roster-edit-list {
+  max-height: 400px;
+  overflow-y: auto;
+  margin: 12px 0;
+}
+
+.roster-edit-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.roster-edit-date {
+  font-size: 14px;
+}
+
+.roster-edit-date small {
+  color: var(--text-muted);
+  margin-left: 4px;
+}
+
+.roster-shift-select {
+  padding: 8px 12px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 13px;
+  outline: none;
+  min-width: 120px;
+}
+
+.roster-shift-select:focus {
+  border-color: var(--accent);
+}
+
 /* Safe area for notch phones */
 @supports (padding: env(safe-area-inset-bottom)) {
   .bottom-nav {

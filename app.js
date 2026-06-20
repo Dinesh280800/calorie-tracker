@@ -634,10 +634,14 @@ function renderMealPlan() {
 
 function renderRoster() {
   const el = document.getElementById('roster-display');
-  const dates = Object.keys(SHIFT_ROSTER).sort();
+  
+  // Merge hardcoded + custom roster dates
+  const customRoster = getCustomRoster();
+  const allDates = new Set([...Object.keys(SHIFT_ROSTER), ...Object.keys(customRoster)]);
+  const dates = [...allDates].sort();
   
   if (dates.length === 0) {
-    el.innerHTML = '<p class="muted">No roster data loaded</p>';
+    el.innerHTML = '<p class="muted">No roster data loaded. Tap "Edit Roster" to add your shifts.</p>';
     return;
   }
 
@@ -663,6 +667,80 @@ function renderRoster() {
       <span class="legend-item"><span class="dot compOff"></span> Comp Off</span>
     </div>
   `;
+}
+
+// ==========================================
+// ROSTER EDITOR
+// ==========================================
+
+function initRosterEditor() {
+  document.getElementById('btn-edit-roster').addEventListener('click', () => {
+    const editor = document.getElementById('roster-editor');
+    editor.classList.toggle('hidden');
+  });
+
+  document.getElementById('btn-load-month').addEventListener('click', loadRosterMonth);
+  document.getElementById('btn-save-roster').addEventListener('click', saveRosterEdits);
+}
+
+function loadRosterMonth() {
+  const monthInput = document.getElementById('roster-month').value;
+  if (!monthInput) {
+    showToast('Select a month');
+    return;
+  }
+
+  const [year, month] = monthInput.split('-').map(Number);
+  const daysInMonth = new Date(year, month, 0).getDate();
+  const grid = document.getElementById('roster-edit-grid');
+  const customRoster = getCustomRoster();
+
+  const shiftOptions = ['morning', 'evening', 'general', 'compOff', 'leave', 'off'];
+  
+  let html = '<div class="roster-edit-list">';
+  for (let day = 1; day <= daysInMonth; day++) {
+    const dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    const d = new Date(dateStr + 'T12:00:00');
+    const dayName = d.toLocaleDateString('en-IN', { weekday: 'short' });
+    
+    // Determine current shift for this date
+    const currentShift = getDineshShift(dateStr);
+    
+    html += `
+      <div class="roster-edit-row">
+        <div class="roster-edit-date">
+          <strong>${day}</strong> <small>${dayName}</small>
+        </div>
+        <select class="roster-shift-select" data-date="${dateStr}">
+          ${shiftOptions.map(opt => `
+            <option value="${opt}" ${currentShift.type === opt ? 'selected' : ''}>
+              ${opt === 'compOff' ? 'Comp Off' : opt.charAt(0).toUpperCase() + opt.slice(1)}
+            </option>
+          `).join('')}
+        </select>
+      </div>
+    `;
+  }
+  html += '</div>';
+  
+  grid.innerHTML = html;
+  document.getElementById('btn-save-roster').classList.remove('hidden');
+}
+
+function saveRosterEdits() {
+  const selects = document.querySelectorAll('.roster-shift-select');
+  const customRoster = getCustomRoster();
+  
+  selects.forEach(select => {
+    const date = select.dataset.date;
+    const shiftType = select.value;
+    customRoster[date] = { type: shiftType };
+  });
+
+  saveCustomRoster(customRoster);
+  renderRoster();
+  renderDashboard();
+  showToast('✅ Roster saved!');
 }
 
 // ==========================================
@@ -1099,6 +1177,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initNavigation();
   initFoodSearch();
   initExercise();
+  initRosterEditor();
   renderDashboard();
 
   // Event listeners
