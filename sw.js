@@ -1,11 +1,11 @@
 const CACHE_NAME = 'caltracker-v1';
 const urlsToCache = [
-  '/',
-  '/index.html',
-  '/style.css',
-  '/app.js',
-  '/food-db.js',
-  '/shift-data.js'
+  './',
+  './index.html',
+  './style.css',
+  './app.js',
+  './food-db.js',
+  './shift-data.js'
 ];
 
 self.addEventListener('install', event => {
