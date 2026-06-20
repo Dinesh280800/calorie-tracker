@@ -303,22 +303,20 @@ function renderExerciseSummary(exercises, totalCals) {
     el.innerHTML = '<p class="muted">No exercise logged today</p>';
     return;
   }
-  el.innerHTML = exercises.map(ex => 
-    `<div class="exercise-item">
-      <span>${ex.type === 'walk' ? '🚶' : '🏋️'} ${ex.type} - ${ex.duration} min</span>
+  const activities = getActivities();
+  el.innerHTML = exercises.map(ex => {
+    const activity = activities.find(a => a.key === ex.type) || {};
+    const icon = activity.icon || '🏃';
+    return `<div class="exercise-item">
+      <span>${icon} ${ex.type} - ${ex.duration} min</span>
       <span class="cal-burned">-${ex.caloriesBurned} kcal</span>
-    </div>`
-  ).join('') + `<div class="exercise-total">Total burned: <strong>${totalCals} kcal</strong></div>`;
+    </div>`;
+  }).join('') + `<div class="exercise-total">Total burned: <strong>${totalCals} kcal</strong></div>`;
 }
 
 function renderSupplements(supplements) {
   const el = document.getElementById('supplements-checklist');
-  const items = [
-    { key: 'omega3', label: 'Omega-3 Fish Oil', icon: '🐟' },
-    { key: 'magnesium', label: 'Magnesium Glycinate', icon: '💊' },
-    { key: 'vitaminC', label: 'Vitamin C', icon: '🍊' },
-    { key: 'creatine', label: 'Creatine (5g)', icon: '💪' }
-  ];
+  const items = getSupplements();
   
   el.innerHTML = items.map(item => `
     <label class="supplement-item ${supplements[item.key] ? 'taken' : ''}">
@@ -332,6 +330,76 @@ function renderSupplements(supplements) {
 function toggleSupplement(key, taken) {
   updateSupplement(APP_STATE.currentDate, key, taken);
   showToast(`${taken ? '✅' : '❌'} Supplement ${taken ? 'taken' : 'unmarked'}`);
+}
+
+// ==========================================
+// SUPPLEMENTS (Dynamic)
+// ==========================================
+
+const DEFAULT_SUPPLEMENTS = [
+  { key: 'omega3', label: 'Omega-3 Fish Oil', icon: '🐟' },
+  { key: 'magnesium', label: 'Magnesium Glycinate', icon: '💊' },
+  { key: 'vitaminC', label: 'Vitamin C', icon: '🍊' },
+  { key: 'creatine', label: 'Creatine (5g)', icon: '💪' }
+];
+
+function getSupplements() {
+  return getStorage('supplements', DEFAULT_SUPPLEMENTS);
+}
+
+function saveSupplements(supplements) {
+  setStorage('supplements', supplements);
+}
+
+function initSupplementManager() {
+  document.getElementById('btn-add-supplement').addEventListener('click', addNewSupplement);
+  renderSupplementManager();
+}
+
+function addNewSupplement() {
+  const name = document.getElementById('new-supplement-name').value.trim();
+  const icon = document.getElementById('new-supplement-icon').value.trim() || '💊';
+
+  if (!name) { showToast('Enter supplement name'); return; }
+
+  const supplements = getSupplements();
+  const key = name.toLowerCase().replace(/[^a-z0-9]/g, '_');
+
+  if (supplements.find(s => s.key === key)) {
+    showToast('Supplement already exists');
+    return;
+  }
+
+  supplements.push({ key, label: name, icon });
+  saveSupplements(supplements);
+
+  document.getElementById('new-supplement-name').value = '';
+  document.getElementById('new-supplement-icon').value = '';
+
+  renderSupplementManager();
+  renderDashboard();
+  showToast(`✅ Added "${name}"`);
+}
+
+function removeSupplement(key) {
+  const supplements = getSupplements().filter(s => s.key !== key);
+  saveSupplements(supplements);
+  renderSupplementManager();
+  renderDashboard();
+  showToast('Supplement removed');
+}
+
+function renderSupplementManager() {
+  const el = document.getElementById('supplement-manager-list');
+  if (!el) return;
+  const supplements = getSupplements();
+
+  el.innerHTML = supplements.map(s => `
+    <div class="manage-item">
+      <span>${s.icon} ${s.label}</span>
+      <button class="btn-remove" onclick="removeSupplement('${s.key}')">✕</button>
+    </div>
+  `).join('');
 }
 
 function renderTodaysMeals(meals) {
@@ -488,70 +556,145 @@ function addCustomFood() {
 }
 
 // ==========================================
-// EXERCISE
+// EXERCISE (Dynamic Activities)
 // ==========================================
 
+const DEFAULT_ACTIVITIES = [
+  { key: 'walk', label: 'Walking (brisk)', icon: '🚶', calPerMin: 3.3 },
+  { key: 'gym_strength', label: 'Gym - Strength', icon: '🏋️', calPerMin: 5 },
+  { key: 'gym_cardio', label: 'Gym - Cardio', icon: '🏃', calPerMin: 7 },
+  { key: 'gym_mixed', label: 'Gym - Mixed', icon: '💪', calPerMin: 6 },
+  { key: 'cycling', label: 'Cycling', icon: '🚴', calPerMin: 6.5 },
+  { key: 'swimming', label: 'Swimming', icon: '🏊', calPerMin: 8 },
+  { key: 'yoga', label: 'Yoga', icon: '🧘', calPerMin: 3 },
+  { key: 'sports', label: 'Sports (Cricket/Badminton)', icon: '🏏', calPerMin: 5.5 },
+  { key: 'stairs', label: 'Stair Climbing', icon: '🪜', calPerMin: 9 },
+  { key: 'stretching', label: 'Stretching', icon: '🤸', calPerMin: 2.5 },
+];
+
+function getActivities() {
+  return getStorage('activities', DEFAULT_ACTIVITIES);
+}
+
+function saveActivities(activities) {
+  setStorage('activities', activities);
+}
+
 function initExercise() {
-  const walkDuration = document.getElementById('walk-duration');
-  const gymDuration = document.getElementById('gym-duration');
-  const gymType = document.getElementById('gym-type');
+  const durationInput = document.getElementById('activity-duration');
+  const activitySelect = document.getElementById('activity-select');
 
-  walkDuration.addEventListener('input', () => {
-    const mins = parseInt(walkDuration.value) || 0;
-    // ~3.3 cal/min for brisk walking at ~94kg
-    const cals = Math.round(mins * 3.3);
-    document.getElementById('walk-calories').textContent = `~${cals}`;
-  });
+  // Populate activity dropdown
+  renderActivitySelect();
 
-  gymDuration.addEventListener('input', updateGymCalories);
-  gymType.addEventListener('change', updateGymCalories);
+  activitySelect.addEventListener('change', updateActivityCalories);
+  durationInput.addEventListener('input', updateActivityCalories);
 
-  function updateGymCalories() {
-    const mins = parseInt(gymDuration.value) || 0;
-    const type = gymType.value;
-    const rates = { strength: 5, cardio: 7, mixed: 6 };
-    const cals = Math.round(mins * (rates[type] || 5));
-    document.getElementById('gym-calories').textContent = `~${cals}`;
+  function updateActivityCalories() {
+    const activities = getActivities();
+    const selected = activities.find(a => a.key === activitySelect.value);
+    const mins = parseInt(durationInput.value) || 0;
+    const cals = selected ? Math.round(mins * selected.calPerMin) : 0;
+    document.getElementById('activity-calories').textContent = `~${cals}`;
   }
 
   // Render gym schedule
   renderGymSchedule();
+  
+  // Render activity manager list
+  renderActivityManager();
+
+  // Event listeners
+  document.getElementById('btn-log-activity').addEventListener('click', logActivity);
+  document.getElementById('btn-add-activity').addEventListener('click', addNewActivity);
 }
 
-function logWalk() {
-  const duration = parseInt(document.getElementById('walk-duration').value) || 0;
-  if (duration <= 0) {
-    showToast('Enter walk duration');
+function renderActivitySelect() {
+  const select = document.getElementById('activity-select');
+  const activities = getActivities();
+  select.innerHTML = activities.map(a => 
+    `<option value="${a.key}">${a.icon} ${a.label} (~${a.calPerMin} cal/min)</option>`
+  ).join('');
+  // Trigger calorie update
+  const durationInput = document.getElementById('activity-duration');
+  const mins = parseInt(durationInput.value) || 0;
+  const selected = activities[0];
+  if (selected) {
+    document.getElementById('activity-calories').textContent = `~${Math.round(mins * selected.calPerMin)}`;
+  }
+}
+
+function logActivity() {
+  const activities = getActivities();
+  const select = document.getElementById('activity-select');
+  const duration = parseInt(document.getElementById('activity-duration').value) || 0;
+  const selected = activities.find(a => a.key === select.value);
+
+  if (!selected || duration <= 0) {
+    showToast('Select activity and enter duration');
     return;
   }
-  const cals = Math.round(duration * 3.3);
+
+  const cals = Math.round(duration * selected.calPerMin);
   addExercise(APP_STATE.currentDate, {
-    type: 'walk',
+    type: selected.key,
+    label: selected.label,
+    icon: selected.icon,
     duration,
     caloriesBurned: cals
   });
-  showToast(`🚶 Logged ${duration} min walk (-${cals} kcal)`);
+  showToast(`${selected.icon} Logged ${duration} min ${selected.label} (-${cals} kcal)`);
   renderDashboard();
   renderExerciseLog();
 }
 
-function logGym() {
-  const duration = parseInt(document.getElementById('gym-duration').value) || 0;
-  const type = document.getElementById('gym-type').value;
-  if (duration <= 0) {
-    showToast('Enter gym duration');
+function addNewActivity() {
+  const name = document.getElementById('new-activity-name').value.trim();
+  const icon = document.getElementById('new-activity-icon').value.trim() || '🏃';
+  const calPerMin = parseFloat(document.getElementById('new-activity-calmin').value);
+
+  if (!name) { showToast('Enter activity name'); return; }
+  if (!calPerMin || calPerMin <= 0) { showToast('Enter calories/min'); return; }
+
+  const activities = getActivities();
+  const key = name.toLowerCase().replace(/[^a-z0-9]/g, '_');
+  
+  if (activities.find(a => a.key === key)) {
+    showToast('Activity already exists');
     return;
   }
-  const rates = { strength: 5, cardio: 7, mixed: 6 };
-  const cals = Math.round(duration * (rates[type] || 5));
-  addExercise(APP_STATE.currentDate, {
-    type: `gym (${type})`,
-    duration,
-    caloriesBurned: cals
-  });
-  showToast(`🏋️ Logged ${duration} min gym (-${cals} kcal)`);
-  renderDashboard();
-  renderExerciseLog();
+
+  activities.push({ key, label: name, icon, calPerMin });
+  saveActivities(activities);
+
+  // Clear form
+  document.getElementById('new-activity-name').value = '';
+  document.getElementById('new-activity-icon').value = '';
+  document.getElementById('new-activity-calmin').value = '';
+
+  renderActivitySelect();
+  renderActivityManager();
+  showToast(`✅ Added "${name}"`);
+}
+
+function removeActivity(key) {
+  const activities = getActivities().filter(a => a.key !== key);
+  saveActivities(activities);
+  renderActivitySelect();
+  renderActivityManager();
+  showToast('Activity removed');
+}
+
+function renderActivityManager() {
+  const el = document.getElementById('activity-list');
+  const activities = getActivities();
+  
+  el.innerHTML = activities.map(a => `
+    <div class="manage-item">
+      <span>${a.icon} ${a.label} <small class="muted">(${a.calPerMin} cal/min)</small></span>
+      <button class="btn-remove" onclick="removeActivity('${a.key}')">✕</button>
+    </div>
+  `).join('');
 }
 
 function renderExerciseLog() {
@@ -563,12 +706,15 @@ function renderExerciseLog() {
     return;
   }
 
-  el.innerHTML = log.exercises.map((ex, idx) => `
-    <div class="exercise-log-item">
-      <span>${ex.type === 'walk' ? '🚶' : '🏋️'} ${ex.type} - ${ex.duration} min - ${ex.caloriesBurned} kcal burned</span>
+  const activities = getActivities();
+  el.innerHTML = log.exercises.map((ex, idx) => {
+    const activity = activities.find(a => a.key === ex.type) || {};
+    const icon = ex.icon || activity.icon || '🏃';
+    return `<div class="exercise-log-item">
+      <span>${icon} ${ex.label || ex.type} - ${ex.duration} min - ${ex.caloriesBurned} kcal</span>
       <button class="btn-remove" onclick="removeExercise(${idx})">✕</button>
-    </div>
-  `).join('');
+    </div>`;
+  }).join('');
 }
 
 function removeExercise(index) {
@@ -1128,8 +1274,8 @@ function initNavigation() {
       // Render tab-specific content
       if (tab === 'dashboard') renderDashboard();
       if (tab === 'plan') renderMealPlan();
-      if (tab === 'settings') initSettings();
-      if (tab === 'exercise') renderExerciseLog();
+      if (tab === 'settings') { initSettings(); renderSupplementManager(); }
+      if (tab === 'exercise') { renderExerciseLog(); renderActivityManager(); }
     });
   });
 
@@ -1178,13 +1324,12 @@ document.addEventListener('DOMContentLoaded', () => {
   initFoodSearch();
   initExercise();
   initRosterEditor();
+  initSupplementManager();
   renderDashboard();
 
   // Event listeners
   document.getElementById('btn-add-food').addEventListener('click', addFoodEntry);
   document.getElementById('btn-add-custom').addEventListener('click', addCustomFood);
-  document.getElementById('btn-log-walk').addEventListener('click', logWalk);
-  document.getElementById('btn-log-gym').addEventListener('click', logGym);
   document.getElementById('btn-save-stats').addEventListener('click', saveSettings);
   document.getElementById('btn-enable-notifications').addEventListener('click', enableNotifications);
   document.getElementById('btn-export').addEventListener('click', exportData);

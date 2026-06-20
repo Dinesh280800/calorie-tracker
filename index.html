@@ -178,36 +178,21 @@
 
       <!-- Exercise Tab -->
       <section id="tab-exercise" class="tab-content">
+        <!-- Quick Log from saved activities -->
         <div class="card">
-          <h3>🚶 Walking</h3>
+          <h3>⚡ Quick Log Activity</h3>
+          <div class="form-row">
+            <label>Activity:</label>
+            <select id="activity-select"></select>
+          </div>
           <div class="form-row">
             <label>Duration (minutes):</label>
-            <input type="number" id="walk-duration" placeholder="e.g. 120" value="120">
+            <input type="number" id="activity-duration" placeholder="e.g. 60" value="60">
           </div>
           <div class="form-row">
-            <label>Estimated calories burned: <strong id="walk-calories">~400</strong></label>
+            <label>Estimated calories burned: <strong id="activity-calories">~0</strong></label>
           </div>
-          <button id="btn-log-walk" class="btn-primary">Log Walk</button>
-        </div>
-
-        <div class="card">
-          <h3>🏋️ Gym Workout</h3>
-          <div class="form-row">
-            <label>Duration (minutes):</label>
-            <input type="number" id="gym-duration" placeholder="e.g. 60" value="60">
-          </div>
-          <div class="form-row">
-            <label>Workout Type:</label>
-            <select id="gym-type">
-              <option value="strength">Strength Training</option>
-              <option value="cardio">Cardio</option>
-              <option value="mixed">Mixed</option>
-            </select>
-          </div>
-          <div class="form-row">
-            <label>Estimated calories burned: <strong id="gym-calories">~300</strong></label>
-          </div>
-          <button id="btn-log-gym" class="btn-primary">Log Gym</button>
+          <button id="btn-log-activity" class="btn-primary">Log Activity</button>
         </div>
 
         <div class="card">
@@ -219,6 +204,23 @@
           <h3>📅 Gym Schedule</h3>
           <p>4 days/week (alternate days)</p>
           <div id="gym-week-plan"></div>
+        </div>
+
+        <!-- Manage Activities -->
+        <div class="card">
+          <h3>➕ Manage Activities</h3>
+          <p class="muted">Add custom activities with calories burned per minute.</p>
+          <div id="activity-list"></div>
+          <div class="form-row" style="margin-top:12px">
+            <input type="text" id="new-activity-name" placeholder="Activity name (e.g. Swimming)">
+          </div>
+          <div class="form-row">
+            <input type="text" id="new-activity-icon" placeholder="Emoji icon (e.g. 🏊)" maxlength="4">
+          </div>
+          <div class="form-row">
+            <input type="number" id="new-activity-calmin" step="0.1" placeholder="Calories/min (e.g. 5.0)">
+          </div>
+          <button id="btn-add-activity" class="btn-secondary">Add Activity</button>
         </div>
       </section>
 
@@ -329,6 +331,19 @@
           <button id="btn-import" class="btn-secondary">Import Data</button>
           <input type="file" id="import-file" accept=".json" class="hidden">
           <button id="btn-clear-today" class="btn-danger">Clear Today's Log</button>
+        </div>
+
+        <div class="card">
+          <h3>💊 Manage Supplements</h3>
+          <p class="muted">Add or remove supplements you take daily.</p>
+          <div id="supplement-manager-list"></div>
+          <div class="form-row" style="margin-top:12px">
+            <input type="text" id="new-supplement-name" placeholder="Supplement name (e.g. Zinc)">
+          </div>
+          <div class="form-row">
+            <input type="text" id="new-supplement-icon" placeholder="Emoji icon (e.g. 💊)" maxlength="4">
+          </div>
+          <button id="btn-add-supplement" class="btn-secondary">Add Supplement</button>
         </div>
       </section>
     </main>

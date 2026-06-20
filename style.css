@@ -915,6 +915,24 @@ main {
   border-color: var(--accent);
 }
 
+/* Manage Items (Supplements, Activities) */
+.manage-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+
+.manage-item:last-child {
+  border-bottom: none;
+}
+
+.manage-item small {
+  font-size: 11px;
+}
+
 /* Safe area for notch phones */
 @supports (padding: env(safe-area-inset-bottom)) {
   .bottom-nav {
