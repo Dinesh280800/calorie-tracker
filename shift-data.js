@@ -1,39 +1,7 @@
-// Shift Schedule Data - June 2026
-// Format: { date: 'YYYY-MM-DD', shifts: { morning: name, evening: name, general: [names] } }
+// Shift Schedule Data
+// Roster is managed via the app's Roster Editor (stored in localStorage)
 
-const SHIFT_ROSTER = {
-  // June 2026 - Dinesh S schedule extracted from roster
-  '2026-06-01': { morning: 'Karan', evening: 'Poorna', general: ['Jithendranath', 'Dinesh S', 'Pallavi', 'Rajendra', 'Tirth'] },
-  '2026-06-02': { morning: 'Karan', evening: 'Naveen', general: ['Jithendranath', 'Dinesh S', 'Pallavi', 'Rajendra', 'ShubhamL', 'Tirth'] },
-  '2026-06-03': { morning: 'Poorna', evening: 'Naveen', general: ['Dinesh S', 'Jithendranath', 'Karan', 'Pallavi', 'Rajendra', 'ShubhamL', 'Tirth'] },
-  '2026-06-04': { morning: 'Poorna', evening: 'Naveen', general: ['Dinesh S', 'Jithendranath', 'Karan', 'Pallavi', 'Rajendra', 'Tirth'] },
-  '2026-06-05': { morning: 'Poorna', evening: 'Naveen', general: ['Dinesh S', 'Jithendranath', 'Pallavi', 'Rajendra', 'ShubhamL', 'Tirth'] },
-  '2026-06-06': { morning: 'Karan', evening: 'ShubhamL', general: ['Jithendranath', 'Karan', 'Naveen', 'Pallavi', 'Rajendra', 'Tirth'] },
-  '2026-06-07': { morning: 'Karan', evening: 'ShubhamL', general: ['Dinesh S', 'Jithendranath', 'Naveen', 'Pallavi', 'Rajendra', 'Tirth'] },
-  '2026-06-08': { morning: 'Poorna', evening: 'Dinesh S', general: ['Dinesh S', 'Jithendranath', 'Karan', 'Naveen', 'Pallavi', 'Rajendra', 'Tirth'] },
-  '2026-06-09': { morning: 'Poorna', evening: 'ShubhamL', general: ['Jithendranath', 'Karan', 'Naveen', 'Pallavi', 'Rajendra', 'Tirth'] },
-  '2026-06-10': { morning: 'Poorna', evening: 'ShubhamL', general: ['Dinesh S', 'Jithendranath', 'Pallavi', 'Rajendra', 'Tirth'] },
-  '2026-06-11': { morning: 'Poorna', evening: 'ShubhamL', general: ['Jithendranath', 'Pallavi', 'Rajendra', 'ShubhamL', 'Tirth'] },
-  '2026-06-12': { morning: 'Poorna', evening: 'ShubhamL', general: ['Jithendranath', 'Pallavi', 'Rajendra', 'Tirth'] },
-  '2026-06-13': { morning: 'Dinesh S', evening: 'Naveen', general: ['Jithendranath', 'Pallavi', 'Rajendra', 'ShubhamL', 'Tirth'] },
-  '2026-06-14': { morning: 'Dinesh S', evening: 'Naveen', general: ['Jithendranath', 'Pallavi', 'Rajendra', 'ShubhamL', 'Tirth'] },
-  '2026-06-15': { morning: 'Naveen', evening: 'Poorna', general: ['Poorna', 'Jithendranath', 'Pallavi', 'Rajendra', 'Tirth'] },
-  '2026-06-16': { morning: 'ShubhamL', evening: 'Poorna', general: ['Jithendranath', 'Dinesh S', 'Pallavi', 'Rajendra', 'Tirth'] },
-  '2026-06-17': { morning: 'Naveen', evening: 'Poorna', general: ['Jithendranath', 'Naveen', 'Pallavi', 'Rajendra', 'Tirth'] },
-  '2026-06-18': { morning: 'Naveen', evening: 'Dinesh S', general: ['Dinesh S', 'Jithendranath', 'Pallavi', 'Rajendra', 'Tirth'] },
-  '2026-06-19': { morning: 'Naveen', evening: 'Dinesh S', general: ['Jithendranath', 'Naveen', 'Pallavi', 'Rajendra', 'Tirth'] },
-  '2026-06-20': { morning: 'ShubhamL', evening: 'Poorna', general: ['Dinesh S', 'Jithendranath', 'Pallavi', 'Rajendra', 'Tirth'], compOff: ['Dinesh S'] },
-  '2026-06-21': { morning: 'ShubhamL', evening: 'Poorna', general: ['Poorna', 'Jithendranath', 'Karan', 'Pallavi', 'Rajendra', 'Tirth'] },
-  '2026-06-22': { morning: 'Naveen', evening: 'ShubhamL', general: ['Poorna', 'Jithendranath', 'Pallavi', 'Rajendra', 'ShubhamL', 'Tirth'] },
-  '2026-06-23': { morning: 'Poorna', evening: 'Dinesh S', general: [] },
-  '2026-06-24': { morning: 'Poorna', evening: 'ShubhamL', general: [] },
-  '2026-06-25': { morning: 'Poorna', evening: 'ShubhamL', general: [] },
-  '2026-06-26': { morning: 'Poorna', evening: 'ShubhamL', general: [] },
-  '2026-06-27': { morning: 'Naveen', evening: 'Dinesh S', general: [] },
-  '2026-06-28': { morning: 'Naveen', evening: 'Dinesh S', general: [] },
-  '2026-06-29': { morning: 'ShubhamL', evening: 'Naveen', general: [] },
-  '2026-06-30': { morning: 'Dinesh S', evening: 'Karan', general: [] },
-};
+const SHIFT_ROSTER = {};
 
 // Shift timings
 const SHIFT_TIMINGS = {
