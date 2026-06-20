@@ -1071,6 +1071,369 @@ function renderWeightChart(history) {
 }
 
 // ==========================================
+// LEARNING TRACKER
+// ==========================================
+
+const DEFAULT_LEARNING_TOPICS = [
+  { key: 'aws', label: 'AWS', icon: '☁️', tools: ['EC2', 'EKS', 'ECS', 'Lambda', 'S3', 'IAM', 'VPC', 'CloudFormation', 'Route53', 'CloudWatch', 'RDS', 'DynamoDB', 'SQS', 'SNS', 'API Gateway', 'CodePipeline', 'Secrets Manager', 'WAF', 'GuardDuty', 'ECR', 'Fargate', 'Step Functions'] },
+  { key: 'kubernetes', label: 'Kubernetes', icon: '⎈', tools: ['Pods', 'Deployments', 'Services', 'Ingress', 'ConfigMaps', 'Secrets', 'StatefulSets', 'DaemonSets', 'HPA', 'VPA', 'RBAC', 'Network Policies', 'Helm', 'Kustomize', 'Operators', 'CRDs', 'Service Mesh', 'Pod Security', 'Resource Quotas', 'Namespaces'] },
+  { key: 'keda', label: 'KEDA', icon: '⚡', tools: ['ScaledObject', 'ScaledJob', 'TriggerAuthentication', 'HTTP Scaler', 'Kafka Scaler', 'AWS Scalers', 'Prometheus Scaler', 'Cron Scaler', 'Custom Scalers'] },
+  { key: 'networking', label: 'Networking', icon: '🌐', tools: ['TCP/IP', 'DNS', 'HTTP/HTTPS', 'Load Balancers', 'Firewalls', 'VPN', 'CDN', 'SSL/TLS', 'CIDR', 'Subnetting', 'NAT', 'Proxy', 'BGP', 'OSI Model', 'mTLS', 'Service Discovery'] },
+  { key: 'github_cicd', label: 'GitHub CI/CD', icon: '🔄', tools: ['GitHub Actions', 'Workflows', 'Runners', 'Matrix Builds', 'Reusable Workflows', 'Composite Actions', 'Environments', 'Secrets', 'OIDC', 'Artifact Management', 'Caching', 'Container Actions'] },
+  { key: 'terraform', label: 'Terraform', icon: '🏗️', tools: ['HCL', 'Providers', 'Modules', 'State Management', 'Backends', 'Workspaces', 'Variables', 'Outputs', 'Data Sources', 'Provisioners', 'Import', 'Moved Blocks', 'Terragrunt', 'Atlantis', 'Sentinel', 'tfvars'] },
+  { key: 'observability', label: 'Observability', icon: '📡', tools: ['Prometheus', 'Grafana', 'Loki', 'Tempo', 'Metrics', 'Logs', 'Traces', 'AlertManager', 'PromQL', 'LogQL', 'Dashboards', 'SLO/SLA/SLI', 'OpenTelemetry', 'Jaeger', 'Mimir', 'Thanos', 'PagerDuty', 'Datadog'] },
+  { key: 'ai', label: 'AI / ML', icon: '🤖', tools: ['LLMs', 'Prompt Engineering', 'RAG', 'LangChain', 'Vector DBs', 'Fine-tuning', 'MLOps', 'SageMaker', 'Bedrock', 'AI Agents', 'Copilot', 'OpenAI API', 'HuggingFace', 'Model Serving'] },
+  { key: 'devsecops', label: 'DevSecOps', icon: '🛡️', tools: ['SAST', 'DAST', 'SCA', 'Container Scanning', 'Trivy', 'Snyk', 'Checkov', 'tfsec', 'OPA/Gatekeeper', 'Vault', 'Secret Management', 'SBOM', 'Supply Chain Security', 'Policy as Code', 'Compliance as Code'] },
+  { key: 'linux', label: 'Linux', icon: '🐧', tools: ['Shell Scripting', 'Systemd', 'cgroups', 'namespaces', 'iptables/nftables', 'strace', 'Performance Tuning', 'File Systems', 'SELinux', 'SSH', 'Package Management'] },
+  { key: 'docker', label: 'Docker / Containers', icon: '🐳', tools: ['Dockerfile', 'Multi-stage Builds', 'Docker Compose', 'Buildx', 'Image Optimization', 'Registry', 'Networking', 'Volumes', 'Security Scanning', 'Rootless Containers', 'Podman'] },
+  { key: 'gitops', label: 'GitOps', icon: '📦', tools: ['ArgoCD', 'Flux', 'App of Apps', 'ApplicationSets', 'Sync Policies', 'Rollbacks', 'Progressive Delivery', 'Argo Rollouts', 'Flagger'] },
+  { key: 'python', label: 'Python / Go', icon: '🐍', tools: ['Python Scripting', 'Boto3', 'FastAPI', 'Flask', 'Go Basics', 'Go CLI Tools', 'Automation Scripts', 'Testing'] },
+  { key: 'databases', label: 'Databases', icon: '🗄️', tools: ['MySQL', 'PostgreSQL', 'MongoDB', 'Redis', 'Elasticsearch', 'DynamoDB', 'Database Scaling', 'Replication', 'Backup/Restore', 'Query Optimization'] },
+  { key: 'messaging', label: 'Messaging / Streaming', icon: '📨', tools: ['Kafka', 'RabbitMQ', 'SQS/SNS', 'Event-Driven Architecture', 'Pub/Sub', 'Stream Processing', 'Dead Letter Queues'] },
+  { key: 'sre', label: 'SRE Practices', icon: '🔧', tools: ['Incident Management', 'Postmortems', 'Runbooks', 'Chaos Engineering', 'Capacity Planning', 'Toil Reduction', 'Error Budgets', 'On-Call', 'Game Days', 'Disaster Recovery'] },
+];
+
+const DEFAULT_LEARN_PROFILE = {
+  designation: 'DevOps/SRE Engineer',
+  dailyGoalMins: 60,
+};
+
+function getLearningTopics() {
+  return getStorage('learningTopics', DEFAULT_LEARNING_TOPICS);
+}
+
+function saveLearningTopics(topics) {
+  setStorage('learningTopics', topics);
+}
+
+function getLearnProfile() {
+  return getStorage('learnProfile', DEFAULT_LEARN_PROFILE);
+}
+
+function saveLearnProfile(profile) {
+  setStorage('learnProfile', profile);
+}
+
+function getLearningLog(date) {
+  return getStorage(`learn_${date}`, []);
+}
+
+function saveLearningLog(date, log) {
+  setStorage(`learn_${date}`, log);
+}
+
+function initLearning() {
+  const topicSelect = document.getElementById('learn-topic-select');
+  const subtopicSelect = document.getElementById('learn-subtopic-select');
+
+  // Load profile
+  const profile = getLearnProfile();
+  document.getElementById('learn-designation').value = profile.designation;
+  document.getElementById('learn-daily-goal').value = profile.dailyGoalMins;
+
+  // Populate topic dropdown
+  renderTopicSelects();
+
+  topicSelect.addEventListener('change', () => {
+    renderSubtopicSelect(topicSelect.value);
+  });
+
+  // Event listeners
+  document.getElementById('btn-save-learn-profile').addEventListener('click', () => {
+    const designation = document.getElementById('learn-designation').value.trim();
+    const dailyGoalMins = parseInt(document.getElementById('learn-daily-goal').value) || 60;
+    saveLearnProfile({ designation, dailyGoalMins });
+    showToast('✅ Learning profile saved');
+    renderLearningTab();
+  });
+
+  document.getElementById('btn-log-learning').addEventListener('click', logLearning);
+  document.getElementById('btn-add-topic').addEventListener('click', addNewTopic);
+
+  renderLearningTab();
+}
+
+function renderTopicSelects() {
+  const topics = getLearningTopics();
+  const select = document.getElementById('learn-topic-select');
+  select.innerHTML = topics.map(t => `<option value="${t.key}">${t.icon} ${t.label}</option>`).join('');
+  if (topics.length > 0) {
+    renderSubtopicSelect(topics[0].key);
+  }
+}
+
+function renderSubtopicSelect(topicKey) {
+  const topics = getLearningTopics();
+  const topic = topics.find(t => t.key === topicKey);
+  const select = document.getElementById('learn-subtopic-select');
+  if (!topic || !topic.tools.length) {
+    select.innerHTML = '<option value="general">General</option>';
+    return;
+  }
+  select.innerHTML = '<option value="general">General / Overview</option>' +
+    topic.tools.map(tool => `<option value="${tool}">${tool}</option>`).join('');
+}
+
+function logLearning() {
+  const topicKey = document.getElementById('learn-topic-select').value;
+  const subtopic = document.getElementById('learn-subtopic-select').value;
+  const duration = parseInt(document.getElementById('learn-duration').value) || 0;
+  const notes = document.getElementById('learn-notes').value.trim();
+
+  if (duration <= 0) { showToast('Enter duration'); return; }
+
+  const topics = getLearningTopics();
+  const topic = topics.find(t => t.key === topicKey);
+  if (!topic) { showToast('Select a topic'); return; }
+
+  const log = getLearningLog(APP_STATE.currentDate);
+  log.push({
+    topicKey,
+    topicLabel: topic.label,
+    topicIcon: topic.icon,
+    subtopic,
+    duration,
+    notes,
+    timestamp: new Date().toISOString()
+  });
+  saveLearningLog(APP_STATE.currentDate, log);
+
+  document.getElementById('learn-notes').value = '';
+  showToast(`${topic.icon} Logged ${duration} min of ${topic.label}`);
+  renderLearningTab();
+}
+
+function removeLearningEntry(index) {
+  const log = getLearningLog(APP_STATE.currentDate);
+  log.splice(index, 1);
+  saveLearningLog(APP_STATE.currentDate, log);
+  renderLearningTab();
+  showToast('Entry removed');
+}
+
+function renderLearningTab() {
+  const profile = getLearnProfile();
+  const log = getLearningLog(APP_STATE.currentDate);
+  const totalMins = log.reduce((sum, e) => sum + e.duration, 0);
+  const goal = profile.dailyGoalMins;
+  const pct = Math.min(Math.round((totalMins / goal) * 100), 100);
+
+  // Progress
+  document.getElementById('learn-today-mins').textContent = totalMins;
+  document.getElementById('learn-goal-mins').textContent = goal;
+  document.getElementById('learn-today-pct').textContent = pct + '%';
+  document.getElementById('learn-progress-bar').style.width = pct + '%';
+
+  // Today's log
+  const logEl = document.getElementById('learn-today-log');
+  if (log.length === 0) {
+    logEl.innerHTML = '<p class="muted" style="margin-top:12px">No learning logged today. Start learning!</p>';
+  } else {
+    logEl.innerHTML = log.map((entry, idx) => `
+      <div class="learn-log-item">
+        <div class="learn-log-info">
+          <span class="learn-log-topic">${entry.topicIcon} ${entry.topicLabel}</span>
+          <span class="learn-log-detail">${entry.subtopic} · ${entry.duration} min${entry.notes ? ' · ' + entry.notes : ''}</span>
+        </div>
+        <button class="btn-remove" onclick="removeLearningEntry(${idx})">✕</button>
+      </div>
+    `).join('');
+  }
+
+  // Streak
+  renderLearningStreak();
+
+  // Skill map
+  renderSkillMap();
+
+  // Topic manager
+  renderTopicManager();
+}
+
+function renderLearningStreak() {
+  const el = document.getElementById('learn-streak-display');
+  let streak = 0;
+  const today = new Date();
+
+  for (let i = 0; i < 365; i++) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const dateStr = d.toISOString().split('T')[0];
+    const log = getLearningLog(dateStr);
+    if (log.length > 0) {
+      streak++;
+    } else if (i > 0) {
+      break;
+    }
+  }
+
+  // Last 14 days heatmap
+  const days = [];
+  for (let i = 13; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const dateStr = d.toISOString().split('T')[0];
+    const log = getLearningLog(dateStr);
+    const mins = log.reduce((sum, e) => sum + e.duration, 0);
+    days.push({ date: dateStr, mins, day: d.toLocaleDateString('en-IN', { weekday: 'narrow' }) });
+  }
+
+  el.innerHTML = `
+    <div class="streak-number">${streak} day${streak !== 1 ? 's' : ''} 🔥</div>
+    <div class="streak-heatmap">
+      ${days.map(d => {
+        const level = d.mins === 0 ? 0 : d.mins < 30 ? 1 : d.mins < 60 ? 2 : 3;
+        return `<div class="heatmap-cell level-${level}" title="${d.date}: ${d.mins} min">
+          <span class="heatmap-day">${d.day}</span>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="heatmap-legend">
+      <small>Less</small>
+      <div class="heatmap-cell level-0 small"></div>
+      <div class="heatmap-cell level-1 small"></div>
+      <div class="heatmap-cell level-2 small"></div>
+      <div class="heatmap-cell level-3 small"></div>
+      <small>More</small>
+    </div>
+  `;
+}
+
+function renderSkillMap() {
+  const el = document.getElementById('skill-map');
+  const topics = getLearningTopics();
+
+  // Aggregate all time across all dates for each topic
+  const topicHours = {};
+  topics.forEach(t => { topicHours[t.key] = 0; });
+
+  // Scan last 90 days
+  const today = new Date();
+  for (let i = 0; i < 90; i++) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    const dateStr = d.toISOString().split('T')[0];
+    const log = getLearningLog(dateStr);
+    log.forEach(entry => {
+      if (topicHours[entry.topicKey] !== undefined) {
+        topicHours[entry.topicKey] += entry.duration;
+      }
+    });
+  }
+
+  const maxMins = Math.max(...Object.values(topicHours), 1);
+
+  el.innerHTML = topics.map(t => {
+    const mins = topicHours[t.key] || 0;
+    const hrs = (mins / 60).toFixed(1);
+    const pct = Math.round((mins / maxMins) * 100);
+    return `
+      <div class="skill-item">
+        <div class="skill-label">
+          <span>${t.icon} ${t.label}</span>
+          <span class="skill-hours">${hrs}h</span>
+        </div>
+        <div class="progress-bar"><div class="progress-fill skill" style="width:${pct}%"></div></div>
+      </div>
+    `;
+  }).join('');
+}
+
+function addNewTopic() {
+  const name = document.getElementById('new-topic-name').value.trim();
+  const icon = document.getElementById('new-topic-icon').value.trim() || '📘';
+  const toolsStr = document.getElementById('new-topic-tools').value.trim();
+
+  if (!name) { showToast('Enter topic name'); return; }
+
+  const topics = getLearningTopics();
+  const key = name.toLowerCase().replace(/[^a-z0-9]/g, '_');
+
+  if (topics.find(t => t.key === key)) {
+    showToast('Topic already exists');
+    return;
+  }
+
+  const tools = toolsStr ? toolsStr.split(',').map(t => t.trim()).filter(Boolean) : [];
+  topics.push({ key, label: name, icon, tools });
+  saveLearningTopics(topics);
+
+  document.getElementById('new-topic-name').value = '';
+  document.getElementById('new-topic-icon').value = '';
+  document.getElementById('new-topic-tools').value = '';
+
+  renderTopicSelects();
+  renderTopicManager();
+  showToast(`✅ Added "${name}"`);
+}
+
+function removeTopic(key) {
+  const topics = getLearningTopics().filter(t => t.key !== key);
+  saveLearningTopics(topics);
+  renderTopicSelects();
+  renderTopicManager();
+  showToast('Topic removed');
+}
+
+function addToolToTopic(topicKey) {
+  const input = document.getElementById(`add-tool-${topicKey}`);
+  const toolName = input.value.trim();
+  if (!toolName) return;
+
+  const topics = getLearningTopics();
+  const topic = topics.find(t => t.key === topicKey);
+  if (!topic) return;
+
+  if (topic.tools.includes(toolName)) {
+    showToast('Tool already exists');
+    return;
+  }
+
+  topic.tools.push(toolName);
+  saveLearningTopics(topics);
+  input.value = '';
+  renderTopicManager();
+  renderTopicSelects();
+  showToast(`Added "${toolName}" to ${topic.label}`);
+}
+
+function removeToolFromTopic(topicKey, toolName) {
+  const topics = getLearningTopics();
+  const topic = topics.find(t => t.key === topicKey);
+  if (!topic) return;
+  topic.tools = topic.tools.filter(t => t !== toolName);
+  saveLearningTopics(topics);
+  renderTopicManager();
+  renderTopicSelects();
+}
+
+function renderTopicManager() {
+  const el = document.getElementById('learn-topic-manager');
+  const topics = getLearningTopics();
+
+  el.innerHTML = topics.map(t => `
+    <details class="topic-details">
+      <summary>
+        <span>${t.icon} ${t.label}</span>
+        <button class="btn-remove" onclick="event.stopPropagation(); removeTopic('${t.key}')">✕</button>
+      </summary>
+      <div class="topic-tools-list">
+        ${t.tools.map(tool => `
+          <span class="tool-tag">
+            ${tool}
+            <button class="tag-remove" onclick="removeToolFromTopic('${t.key}', '${tool.replace(/'/g, "\\'")}')">×</button>
+          </span>
+        `).join('')}
+        <div class="add-tool-inline">
+          <input type="text" id="add-tool-${t.key}" placeholder="Add tool..." class="inline-input">
+          <button class="btn-inline-add" onclick="addToolToTopic('${t.key}')">+</button>
+        </div>
+      </div>
+    </details>
+  `).join('');
+}
+
+// ==========================================
 // NOTIFICATIONS
 // ==========================================
 
@@ -1159,6 +1522,20 @@ function scheduleNotifications() {
     const delay = exTime.getTime() - now.getTime();
     if (delay > 0) {
       scheduleNotification('🏃 Exercise Time!', plan.exercise.suggestion, delay);
+    }
+  }
+
+  // Learning reminder - 9 PM daily
+  const learnReminder = new Date(now);
+  learnReminder.setHours(21, 0, 0, 0);
+  const learnDelay = learnReminder.getTime() - now.getTime();
+  if (learnDelay > 0) {
+    const todayLog = getLearningLog(now.toISOString().split('T')[0]);
+    const todayMins = todayLog.reduce((s, e) => s + e.duration, 0);
+    const learnProfile = getLearnProfile();
+    if (todayMins < learnProfile.dailyGoalMins) {
+      const remaining = learnProfile.dailyGoalMins - todayMins;
+      scheduleNotification('📚 Learning Reminder', `You still need ${remaining} min to hit your daily goal!`, learnDelay);
     }
   }
 }
@@ -1256,6 +1633,7 @@ function initNavigation() {
     dashboard: 'Dashboard',
     log: 'Log Food',
     exercise: 'Exercise',
+    learn: 'Learning',
     plan: 'Meal Plan',
     settings: 'Settings'
   };
@@ -1276,6 +1654,7 @@ function initNavigation() {
       if (tab === 'plan') renderMealPlan();
       if (tab === 'settings') { initSettings(); renderSupplementManager(); }
       if (tab === 'exercise') { renderExerciseLog(); renderActivityManager(); }
+      if (tab === 'learn') renderLearningTab();
     });
   });
 
@@ -1325,6 +1704,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initExercise();
   initRosterEditor();
   initSupplementManager();
+  initLearning();
   renderDashboard();
 
   // Event listeners

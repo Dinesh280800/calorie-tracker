@@ -933,6 +933,225 @@ main {
   font-size: 11px;
 }
 
+/* Learning Tab */
+.learn-progress-bar-container {
+  margin-bottom: 16px;
+}
+
+.learn-progress-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
+.progress-fill.learn {
+  background: linear-gradient(90deg, #6c5ce7, #a29bfe);
+}
+
+.progress-fill.skill {
+  background: linear-gradient(90deg, #00b894, #55efc4);
+}
+
+.learn-log-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.learn-log-item:last-child {
+  border-bottom: none;
+}
+
+.learn-log-topic {
+  font-size: 14px;
+  font-weight: 500;
+  display: block;
+}
+
+.learn-log-detail {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* Streak */
+.streak-number {
+  font-size: 24px;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 12px;
+}
+
+.streak-heatmap {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.heatmap-cell {
+  width: 28px;
+  height: 34px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9px;
+  color: var(--text-muted);
+}
+
+.heatmap-cell.small {
+  width: 14px;
+  height: 14px;
+}
+
+.heatmap-cell.level-0 { background: var(--bg-input); }
+.heatmap-cell.level-1 { background: rgba(108, 92, 231, 0.3); }
+.heatmap-cell.level-2 { background: rgba(108, 92, 231, 0.6); }
+.heatmap-cell.level-3 { background: rgba(108, 92, 231, 0.9); }
+
+.heatmap-day {
+  font-size: 9px;
+}
+
+.heatmap-legend {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+/* Skill Map */
+.skill-item {
+  margin-bottom: 10px;
+}
+
+.skill-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.skill-hours {
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+/* Topic Manager */
+.topic-details {
+  border-bottom: 1px solid var(--border);
+  padding: 10px 0;
+}
+
+.topic-details:last-child {
+  border-bottom: none;
+}
+
+.topic-details summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  list-style: none;
+  padding: 4px 0;
+}
+
+.topic-details summary::-webkit-details-marker {
+  display: none;
+}
+
+.topic-details summary::before {
+  content: '▸ ';
+  color: var(--text-muted);
+}
+
+.topic-details[open] summary::before {
+  content: '▾ ';
+}
+
+.topic-tools-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 10px 0 4px 16px;
+}
+
+.tool-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 10px;
+  background: var(--bg-input);
+  border-radius: 12px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.tag-remove {
+  background: none;
+  border: none;
+  color: var(--danger);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0 2px;
+  line-height: 1;
+  opacity: 0.7;
+}
+
+.tag-remove:active {
+  opacity: 1;
+}
+
+.add-tool-inline {
+  display: flex;
+  gap: 4px;
+  width: 100%;
+  margin-top: 6px;
+}
+
+.inline-input {
+  flex: 1;
+  padding: 6px 10px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 12px;
+  outline: none;
+}
+
+.inline-input:focus {
+  border-color: var(--accent);
+}
+
+.btn-inline-add {
+  padding: 6px 12px;
+  background: var(--accent);
+  color: var(--bg-primary);
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* 6-tab nav: smaller labels */
+.nav-btn {
+  padding: 8px 6px;
+}
+
+.nav-label {
+  font-size: 9px;
+}
+
 /* Safe area for notch phones */
 @supports (padding: env(safe-area-inset-bottom)) {
   .bottom-nav {

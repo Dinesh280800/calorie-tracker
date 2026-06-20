@@ -346,6 +346,88 @@
           <button id="btn-add-supplement" class="btn-secondary">Add Supplement</button>
         </div>
       </section>
+
+      <!-- Learning Tab -->
+      <section id="tab-learn" class="tab-content">
+        <!-- Profile -->
+        <div class="card">
+          <h3>👤 Learning Profile</h3>
+          <div class="form-row">
+            <label>Designation:</label>
+            <input type="text" id="learn-designation" placeholder="e.g. DevOps/SRE Engineer">
+          </div>
+          <div class="form-row">
+            <label>Daily Learning Goal (minutes):</label>
+            <input type="number" id="learn-daily-goal" placeholder="60" value="60">
+          </div>
+          <button id="btn-save-learn-profile" class="btn-secondary">Save Profile</button>
+        </div>
+
+        <!-- Today's Learning -->
+        <div class="card">
+          <h3>📖 Log Learning</h3>
+          <div class="form-row">
+            <label>Topic:</label>
+            <select id="learn-topic-select"></select>
+          </div>
+          <div class="form-row">
+            <label>Sub-topic / Tool:</label>
+            <select id="learn-subtopic-select"></select>
+          </div>
+          <div class="form-row">
+            <label>Duration (minutes):</label>
+            <input type="number" id="learn-duration" placeholder="30" value="30">
+          </div>
+          <div class="form-row">
+            <label>Notes (optional):</label>
+            <input type="text" id="learn-notes" placeholder="What did you learn?">
+          </div>
+          <button id="btn-log-learning" class="btn-primary">Log Learning</button>
+        </div>
+
+        <!-- Today's Progress -->
+        <div class="card">
+          <h3>📊 Today's Progress</h3>
+          <div class="learn-progress-bar-container">
+            <div class="learn-progress-label">
+              <span>⏱️ <span id="learn-today-mins">0</span> / <span id="learn-goal-mins">60</span> min</span>
+              <span id="learn-today-pct">0%</span>
+            </div>
+            <div class="progress-bar"><div class="progress-fill learn" id="learn-progress-bar"></div></div>
+          </div>
+          <div id="learn-today-log"></div>
+        </div>
+
+        <!-- Streak -->
+        <div class="card">
+          <h3>🔥 Learning Streak</h3>
+          <div id="learn-streak-display"></div>
+        </div>
+
+        <!-- Skill Map -->
+        <div class="card">
+          <h3>🗺️ Skill Progress</h3>
+          <p class="muted">Track hours invested per topic</p>
+          <div id="skill-map"></div>
+        </div>
+
+        <!-- Manage Topics -->
+        <div class="card">
+          <h3>✏️ Manage Topics & Tools</h3>
+          <p class="muted">Add or remove learning topics and their sub-tools.</p>
+          <div id="learn-topic-manager"></div>
+          <div class="form-row" style="margin-top:12px">
+            <input type="text" id="new-topic-name" placeholder="Topic (e.g. Service Mesh)">
+          </div>
+          <div class="form-row">
+            <input type="text" id="new-topic-icon" placeholder="Emoji (e.g. 🔗)" maxlength="4">
+          </div>
+          <div class="form-row">
+            <input type="text" id="new-topic-tools" placeholder="Tools comma-separated (e.g. Istio, Linkerd)">
+          </div>
+          <button id="btn-add-topic" class="btn-secondary">Add Topic</button>
+        </div>
+      </section>
     </main>
 
     <!-- Bottom Navigation -->
@@ -361,6 +443,10 @@
       <button class="nav-btn" data-tab="exercise">
         <span class="nav-icon">🏋️</span>
         <span class="nav-label">Exercise</span>
+      </button>
+      <button class="nav-btn" data-tab="learn">
+        <span class="nav-icon">📚</span>
+        <span class="nav-label">Learn</span>
       </button>
       <button class="nav-btn" data-tab="plan">
         <span class="nav-icon">📅</span>
